@@ -7,3 +7,8 @@ This is a basic project that connects to a SFTP server and polls for *.json file
 
 Note -
 I used a SftpPersistentAcceptOnceFileListFilter, used to make sure we do not read the same file (name and timestamp) over and over again. This works till the metadata is not refreshed or the server is restarted.
+
+IntegrationApplication.java - It is the starting point.
+InboundConfiguration.java - It contains the flow and channels.
+SftpTemplateConfiguration.java - It creates a DefaultSftpSessionFactory used to connecting to a SFTP server.
+Application.properties - It contains the SFTP server information needed for establishing a connection.
