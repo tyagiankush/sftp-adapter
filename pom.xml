@@ -127,7 +127,7 @@
                     <archive>
                         <manifest>
                             <!-- Jar file entry point -->
-                            <mainClass>com.spdji.sftpadapter.IntegrationApplication</mainClass>
+                            <mainClass>com.sftpadapter.IntegrationApplication</mainClass>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>classes/</classpathPrefix>
                         </manifest>
