@@ -6,9 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class RequestEntity implements Serializable, IsEmpty {
+public class RequestEntity implements Serializable {
     @JsonProperty(value = "requestMetadata")
-    public RequestMetadata requestMetadata;
+    public Object requestMetadata;
     @JsonProperty(value = "requestBody")
     public Object requestJson;
     @JsonProperty(value = "requestHeaders")
@@ -26,11 +26,11 @@ public class RequestEntity implements Serializable, IsEmpty {
         this.requestJson = requestJson;
     }
 
-    public RequestMetadata getRequestMetadata() {
+    public Object getRequestMetadata() {
         return requestMetadata;
     }
 
-    public void setRequestMetadata(RequestMetadata requestMetadata) {
+    public void setRequestMetadata(Object requestMetadata) {
         this.requestMetadata = requestMetadata;
     }
 
@@ -51,8 +51,4 @@ public class RequestEntity implements Serializable, IsEmpty {
                 '}';
     }
 
-    @Override
-    public boolean isEmpty() {
-        return false;
-    }
 }
