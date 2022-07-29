@@ -1,0 +1,27 @@
+package com.utils;
+
+import org.springframework.integration.file.splitter.FileSplitter;
+
+import java.util.Map;
+
+import static com.constants.SftpConstants.*;
+
+public class SftpUtils {
+
+    public static Long getNonNullLongValue(Map<String, Object> headers, String key) {
+        Long defaultLongVal = 0L;
+        if (headers.get(key) != null) {
+            return Long.parseLong(headers.get(key).toString());
+        }
+        return defaultLongVal;
+    }
+
+    public static Boolean checkIfEmpty(String s) {
+        return (s == null || s.equals(EMPTY_STRING));
+    }
+
+    public FileSplitter splitContentIntoLines() {
+        return new FileSplitter();
+    }
+
+}
