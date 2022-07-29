@@ -1,7 +1,7 @@
 package com.sftpadapter;
 
+import com.beans.RequestEntity;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,7 +10,6 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.ChannelSftp.LsEntry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -41,13 +40,12 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static com.constants.SftpConstants.*;
+
 @Configuration
 @Qualifier("inbound")
 class InboundConfiguration {
     private static final Logger LOGGER = LogManager.getLogger(InboundConfiguration.class);
-    @Autowired
-    @Qualifier("webserviceTypeFactory")
-    WebserviceTypeFactory webserviceTypeFactory;
 
     @Value("${POLLER.DELAY}")
     String POLLER_VALUE_IN_MILLIS;
@@ -127,9 +125,7 @@ class InboundConfiguration {
         LOGGER.info("Setting up callWSFlow outbound channel...");
         return IntegrationFlows
                 .from(WS_REQUEST_CHANNEL)
-                .enrichHeaders(h -> h.headerExpression(HEADER_WS_START_TIME, " + headers['timestamp']"))
                 .handle(this::invokeService)
-                .enrichHeaders(h -> h.headerExpression(HEADER_WS_END_TIME, " + headers['timestamp']"))
                 .log(getPayload())
                 .channel(WS_RESPONSE_CHANNEL)
                 .get();
@@ -161,7 +157,6 @@ class InboundConfiguration {
                 .log(logTheMessageHeaders())
                 .handle(this::buildHeadersFromFailedMsgHeaders)
                 .log(getPayload())
-                .enrichHeaders(addFileStatusToMessageHeaders())
                 .log(logTheMessageHeaders())
                 .handle(this::createErrorResponse)
                 .log(getPayload())
@@ -187,9 +182,7 @@ class InboundConfiguration {
         try {
             LOGGER.info("Starting WS flow...");
             // call service here
-        } catch (JsonProcessingException) {
-            LOGGER.error("Exception occurred while processing request: " + payload, e);
-            return "error";
+            return "response";
         } catch (Exception e) {
             LOGGER.error("Exception occurred, Please check logs. Payload: " + payload, e);
             return "error";
@@ -255,10 +248,6 @@ class InboundConfiguration {
         return headers -> headers.headerExpression(HEADER_FILENAME_TIMESTAMP, " + headers['timestamp']");
     }
 
-    private Consumer<HeaderEnricherSpec> addFileStatusToMessageHeaders() {
-        return headers -> headers.headerExpression(HEADER_FILE_STATUS, "'Failed'");
-    }
-
     private Consumer<HeaderEnricherSpec> addARenameMessageHeader() {
         return headers -> headers.headerExpression(HEADER_FILE_TO_RENAME, REMOTE_ARCHIVE_PATH_AS_EXPR + " + payload");
     }
@@ -295,16 +284,6 @@ class InboundConfiguration {
                 .fileExistsMode(FileExistsMode.REPLACE)
                 .fileNameGenerator(message -> RESPONSE_PREFIX + message.getHeaders().get(HEADER_FILENAME_TIMESTAMP)
                         + UNDERSCORE + message.getHeaders().get(HEADER_CURRENT_FILENAME));
-    }
-
-    private SftpOutboundGatewaySpec putTheReportFile(SessionFactory<ChannelSftp.LsEntry> sessionFactory) {
-        return Sftp.outboundGateway(sessionFactory, AbstractRemoteFileOutboundGateway.Command.PUT, "payload")
-                .remoteDirectoryExpression(REMOTE_REPORT_FOLDER_PATH_AS_EXPRESSION)
-                .fileExistsMode(FileExistsMode.IGNORE)
-                .fileNameGenerator(
-                        message -> REPORT_PREFIX + message.getHeaders().get(HEADER_FILENAME_TIMESTAMP) + UNDERSCORE
-                                + Objects.requireNonNull(message.getHeaders().get(HEADER_CURRENT_FILENAME))
-                                .toString().replace(JSON_FILE_EXT, REPORT_EXT));
     }
 
     private SftpOutboundGatewaySpec moveFileToArchive(SessionFactory<ChannelSftp.LsEntry> sessionFactory) {
