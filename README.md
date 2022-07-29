@@ -1,6 +1,6 @@
-# sftp-adapter
+# sftp-adapter using Spring Integration
 **Summary** - 
- - A file adapter that connects to a sftp server, polls for a file, reads the content of the file, transforms it to a POJO, calls a webservice, and outputs a response JSON file at the out directory.
+ - A file adapter created using _Spring Integration_. We can connect to a sftp server, poll for a certain type of file, read the content of it (split as well), transforms it to a POJO, call a webservice, and outputs a response JSON file at the out directory.
 
 **Functionality** - 
 - This is a basic project that connects to a SFTP server and polls for *.json files. Once the files are fetched using "LS" command, the files are then splitted and passed on to a transformer to be transformed to a POJO interpretation of Request Entity class. You can add your implementation to a webservice call, and then the response file is sent to the server, using "PUT" command. Once the flow is complete, the request/input file is moved to an archive directory, using "MV" command. 
