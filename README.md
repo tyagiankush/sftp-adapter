@@ -1,4 +1,4 @@
-# sftp-adapter using Spring Integration
+# Sftp Adapter using Spring Integration
 **Summary** - 
  - A file adapter created using _Spring Integration_. We can connect to a sftp server, poll for a certain type of file, read the content of it (split as well), transforms it to a POJO, call a webservice, and outputs a response JSON file at the out directory.
 
